@@ -1,12 +1,21 @@
 # Overview
 
-This folder contains a simple Dockerfile for building Armory. It does not run as a service, but is instead spun up every time you need to run a command. It is meant to be run with aliases, to make life easier.
+This repository contains a simple Dockerfile for building Armory. It does not run as a service, but is instead spun up every time you need to run a command. It is meant to be run with aliases, to make life easier.
+
+# Pulling from DockerHub
+DockerHub images are published regularly, and can be pulled using:
+
+```
+docker pull depthsecurity/armory
+```
 
 # Building
 
-From this folder, the easiest way to build Armory is:
+An Armory docker container can be build locally using the Dockerfile in this repository. The easiest way to build Armory is:
 
 ```
+git clone https://github.com/depthsecurity/armory-docker
+cd armory-docker
 docker build -t armory .
 ```
 
