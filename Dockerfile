@@ -11,8 +11,8 @@ CMD ["echo", "Installing Debian packages needed."]
 RUN apt update && apt install -y python python3 git python3-pip python-pip libmariadb-dev-compat wget ruby ruby-dev gem p7zip-full dnsrecon hydra nmap whois git gcc make libpcap-dev libnet-ssleay-perl build-essential zlib1g-dev sudo chromium xclip nano redis-server tmux
 
 WORKDIR /opt/src/golang
-RUN wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz
-RUN tar zxfv go1.14.2.linux-amd64.tar.gz
+RUN wget https://dl.google.com/go/go1.16.linux-amd64.tar.gz
+RUN tar zxfv go1.16.linux-amd64.tar.gz
 RUN ln -s /opt/src/golang/go/bin/go /usr/local/bin/
 RUN ln -s /opt/src/golang/go/bin/gofmt /usr/local/bin/
 RUN mkdir /root/go
@@ -50,11 +50,11 @@ RUN ln -s /root/go/bin/gobuster /usr/local/bin/gobuster
 
 # Gowitness doesn't seem to be building right now - will just use the latest (at the time) release
 
-# RUN go get github.com/sensepost/gowitness
-# RUN ln -s /root/go/bin/gowitness /usr/local/bin/gowitness
+RUN go get github.com/sensepost/gowitness
+RUN ln -s /root/go/bin/gowitness /usr/local/bin/gowitness
 
-RUN wget https://github.com/sensepost/gowitness/releases/download/2.1.1/gowitness-2.1.1-linux-amd64 -O /usr/local/bin/gowitness
-RUN chmod +x /usr/local/bin/gowitness
+#RUN wget https://github.com/sensepost/gowitness/releases/download/2.1.1/gowitness-2.1.1-linux-amd64 -O /usr/local/bin/gowitness
+#RUN chmod +x /usr/local/bin/gowitness
 
 #RUN go get github.com/projectdiscovery/subfinder/cmd/subfinder
 
