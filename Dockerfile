@@ -45,7 +45,7 @@ RUN go get github.com/ffuf/ffuf
 
 RUN ln -s /root/go/bin/ffuf /usr/local/bin/ffuf
 RUN gem install aquatone
-RUN go get github.com/OJ/gobuster
+RUN go get github.com/OJ/gobuster/v3
 RUN ln -s /root/go/bin/gobuster /usr/local/bin/gobuster
 
 # Gowitness doesn't seem to be building right now - will just use the latest (at the time) release
