@@ -33,7 +33,8 @@ RUN git clone https://github.com/L1NT/xsscrapy.git
 RUN git clone https://github.com/fang0654/Asnlookup.git
 RUN git clone https://github.com/laramies/theHarvester
 RUN git clone https://github.com/projectdiscovery/subfinder.git
-RUN touch /tmp/update1
+RUN git clone https://github.com/s0md3v/XSStrike.git
+
 
 RUN git clone https://github.com/fang0654/DomLink.git
 RUN git clone https://github.com/offensive-security/exploitdb.git
@@ -85,6 +86,11 @@ RUN ln -s /opt/nikto/nikto.pl /usr/local/bin/nikto
 WORKDIR /opt/src/pymeta
 RUN python3 setup.py install
 RUN chmod +x pymeta.py
+
+WORKDIR /opt/src/XSStrike
+RUN pip3 install -r requirements.txt
+RUN chmod +x /opt/src/XSStrike/xsstrike.py
+RUN ln -s /opt/src/XSStrike/xsstrike.py /usr/local/bin/xsstrike.py
 
 WORKDIR /opt/src/sslscan
 RUN apt-get build-dep openssl -y
