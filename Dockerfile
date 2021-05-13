@@ -29,7 +29,7 @@ RUN git clone https://github.com/m8r0wn/pymeta
 RUN git clone https://github.com/rbsec/sslscan.git
 RUN git clone https://github.com/aboul3la/Sublist3r.git
 RUN git clone https://github.com/anshumanbh/tko-subs.git
-RUN git clone https://github.com/DanMcInerney/xsscrapy.git
+RUN git clone https://github.com/L1NT/xsscrapy.git
 RUN git clone https://github.com/fang0654/Asnlookup.git
 RUN git clone https://github.com/laramies/theHarvester
 RUN git clone https://github.com/projectdiscovery/subfinder.git
@@ -111,7 +111,7 @@ RUN unzip amass_linux_amd64.zip
 RUN ln -s /opt/src/amass/amass_linux_amd64/amass /usr/local/bin/
 
 WORKDIR /opt/src/xsscrapy
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 ENV PATH="${PATH}:/opt/src/xsscrapy"
 RUN chmod +x /opt/src/xsscrapy/xsscrapy.py
 RUN export PATH=$PATH:/opt/src/xsscrapy
