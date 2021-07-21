@@ -5,8 +5,7 @@ WORKDIR /opt/src
 RUN git clone https://github.com/depthsecurity/armory.git
 WORKDIR /opt/src/armory
 
-
-RUN pip3 install django 
+RUN pip3 install -r requirements.txt
 RUN python3 setup.py install
 RUN pip3 install jinja2 xlsxwriter django_q
 WORKDIR /root/current
