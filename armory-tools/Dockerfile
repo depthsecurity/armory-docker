@@ -10,7 +10,7 @@ RUN apt update && apt install -y python python3 git python3-pip python-pip \
     libmariadb-dev-compat wget ruby ruby-dev gem p7zip-full dnsrecon hydra \
     nmap whois git gcc make libpcap-dev libnet-ssleay-perl build-essential \
     zlib1g-dev sudo chromium xclip nano redis-server tmux curl \
-    && rm -rf /var/lib/apt/lists/*
+    && apt clean
 
 WORKDIR /opt/src/golang
 RUN wget https://dl.google.com/go/go1.16.linux-amd64.tar.gz
