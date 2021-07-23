@@ -12,6 +12,8 @@ RUN apt update && apt install -y python python3 git python3-pip python-pip \
     zlib1g-dev sudo chromium xclip nano redis-server tmux curl \
     && apt clean
 
+RUN python3 -m pip install --upgrade pip
+RUN python -m pip install --upgrade pip
 WORKDIR /opt/src/golang
 RUN wget https://dl.google.com/go/go1.16.linux-amd64.tar.gz
 RUN tar zxfv go1.16.linux-amd64.tar.gz
