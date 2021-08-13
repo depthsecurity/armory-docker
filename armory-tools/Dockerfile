@@ -38,7 +38,7 @@ RUN git clone https://github.com/fang0654/Asnlookup.git
 RUN git clone https://github.com/laramies/theHarvester
 RUN git clone https://github.com/projectdiscovery/subfinder.git
 RUN git clone https://github.com/s0md3v/XSStrike.git
-
+RUN git clone https://github.com/absolomb/adidnsdump.git
 
 RUN git clone https://github.com/fang0654/DomLink.git
 RUN git clone https://github.com/offensive-security/exploitdb.git
@@ -134,6 +134,8 @@ WORKDIR /opt/src/theHarvester
 RUN pip3 install -r requirements.txt
 RUN python3 setup.py install
 
+WORKDIR /opt/src/adidnsdump
+RUN pip3 install .
 
 RUN sed -i 's/\/opt\/exploitdb/\/opt\/src\/exploitdb/g' /opt/src/exploitdb/.searchsploit_rc
 RUN cp /opt/src/exploitdb/.searchsploit_rc /root/
