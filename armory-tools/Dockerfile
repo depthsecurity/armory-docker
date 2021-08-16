@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM debian:testing-slim
 LABEL maintainer="dlawson@depthsecurity.com"
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -6,12 +6,13 @@ ENV GOROOT /opt/src/golang/go
 ENV GOPATH /root/go
 RUN echo "deb-src http://deb.debian.org/debian buster main" >> /etc/apt/sources.list
 
-RUN apt update && apt install -y python python3 git python3-pip python-pip \
+RUN apt update && apt install -y python python3 git python3-pip  \
     libmariadb-dev-compat wget ruby ruby-dev gem p7zip-full dnsrecon hydra \
     nmap whois git gcc make libpcap-dev libnet-ssleay-perl build-essential \
-    zlib1g-dev sudo chromium xclip nano redis-server tmux curl \
-    && apt clean
+    zlib1g-dev sudo chromium xclip nano redis-server tmux curl python3-venv \
+     && apt clean
 
+RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O - | python2 -
 RUN python3 -m pip install --upgrade pip
 RUN python -m pip install --upgrade pip
 WORKDIR /opt/src/golang
@@ -43,6 +44,7 @@ RUN git clone https://github.com/absolomb/adidnsdump.git
 RUN git clone https://github.com/fang0654/DomLink.git
 RUN git clone https://github.com/offensive-security/exploitdb.git
 
+RUN pip3 install virtualenv
 # RUN go get github.com/ffuf/ffuf
 
 # Next couple of lines are to use custom version of ffuf until it gets updated
@@ -79,7 +81,6 @@ WORKDIR /opt/src/jexboss
 RUN pip install -r requires.txt
 RUN ln -s /opt/src/jexboss/jexboss.py /usr/local/bin/jexboss.py
 WORKDIR /opt/src/LinkedInt
-RUN pip install thready http
 RUN chmod +x /opt/src/LinkedInt/LinkedInt.py
 RUN ln -s /opt/src/LinkedInt/LinkedInt.py /usr/local/bin/LinkedInt.py
 WORKDIR /opt/src/masscan
@@ -131,10 +132,15 @@ RUN ln -s /opt/src/DomLink/domLink.py /usr/local/bin/domLink.py
 RUN chmod +x /usr/local/bin/domLink.py
 
 WORKDIR /opt/src/theHarvester
+# RUN python3 -m venv /opt/src/theHarvestor/myenv
 RUN pip3 install -r requirements.txt
 RUN python3 setup.py install
-
+# RUN deactivate
+# RUN echo '/opt/src/theHarvestor/myenv/bin/python3 theHarvestor' >> /usr/local/theHarvestor
+# RUN ln -s /opt/src/theHarvestor/theHarvestor.py /usr/local/bin/theHarvestor.py
+# RUN chmod +x /usr/local/bin/theHarvestor
 WORKDIR /opt/src/adidnsdump
+
 RUN pip3 install .
 
 RUN sed -i 's/\/opt\/exploitdb/\/opt\/src\/exploitdb/g' /opt/src/exploitdb/.searchsploit_rc
