@@ -9,8 +9,8 @@ RUN echo "deb-src http://deb.debian.org/debian buster main" >> /etc/apt/sources.
 RUN apt update && apt install -y python python3 git python3-pip  \
     libmariadb-dev-compat wget ruby ruby-dev gem p7zip-full dnsrecon hydra \
     nmap whois git gcc make libpcap-dev libnet-ssleay-perl build-essential \
-    zlib1g-dev sudo chromium xclip nano redis-server tmux curl python3-venv \
-     && apt clean
+    zlib1g-dev sudo chromium chrome-driver xclip nano redis-server tmux curl python3-venv \
+    netcat && apt clean
 
 RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O - | python2 -
 RUN python3 -m pip install --upgrade pip
