@@ -10,7 +10,7 @@ RUN apt update && apt install -y python python3 git python3-pip  \
     libmariadb-dev-compat wget ruby ruby-dev gem p7zip-full dnsrecon hydra \
     nmap whois git gcc make libpcap-dev libnet-ssleay-perl build-essential \
     zlib1g-dev sudo chromium chromium-driver xclip nano redis-server tmux curl python3-venv \
-    netcat && apt clean
+    netcat-openbsd && apt clean
 
 RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O - | python2 -
 RUN python3 -m pip install --upgrade pip
@@ -104,7 +104,7 @@ RUN make static
 
 RUN ln -s /opt/src/sslscan/sslscan /usr/local/bin/sslscan
 WORKDIR /opt/src/Sublist3r
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 RUN ln -s /opt/src/Sublist3r/sublist3r.py /usr/local/bin/sublist3r
 RUN go get github.com/anshumanbh/tko-subs
 RUN ln -s /root/go/bin/tko-subs /usr/local/bin/tko-subs
