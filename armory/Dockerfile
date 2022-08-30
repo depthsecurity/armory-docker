@@ -25,7 +25,7 @@ RUN pip wheel -r /tmp/armory/requirements.txt -w requirements && \
     pip wheel /tmp/armory/. -w core --no-deps
 
 # Exported Image
-FROM depthsecurity/armory-tools:testing as final
+FROM depthsecurity/armory-tools as final
 LABEL maintainer="dlawson@depthsecurity.com"
 # Copy Armory from build image
 COPY --from=build /tmp/armory-wheel /tmp/armory-wheel
