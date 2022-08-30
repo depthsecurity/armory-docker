@@ -1,148 +1,197 @@
-FROM debian:testing-slim
-LABEL maintainer="dlawson@depthsecurity.com"
+FROM debian:testing-slim as build
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV GOROOT /opt/src/golang/go
-ENV GOPATH /root/go
+# Install build packages
 RUN echo "deb-src http://deb.debian.org/debian buster main" >> /etc/apt/sources.list
+RUN apt update && \
+    apt install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \ 
+    gcc \
+    git \
+    make \
+    wget \
+    zlib1g-dev
 
-RUN apt update && apt install -y python python3 git python3-pip  \
-    libmariadb-dev-compat wget ruby ruby-dev gem p7zip-full dnsrecon hydra \
-    nmap whois git gcc make libpcap-dev libnet-ssleay-perl build-essential \
-    zlib1g-dev sudo chromium chromium-driver xclip nano redis-server tmux curl python3-venv \
-    netcat-openbsd && apt clean
+# Install Golang
+ENV GOROOT "/tmp/golang/go"
 
-RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O - | python2 -
-RUN python3 -m pip install --upgrade pip
-RUN python -m pip install --upgrade pip
-WORKDIR /opt/src/golang
-RUN wget https://dl.google.com/go/go1.16.linux-amd64.tar.gz
-RUN tar zxfv go1.16.linux-amd64.tar.gz
-RUN ln -s /opt/src/golang/go/bin/go /usr/local/bin/
-RUN ln -s /opt/src/golang/go/bin/gofmt /usr/local/bin/
-RUN mkdir /root/go
+WORKDIR /tmp/golang
+RUN wget https://dl.google.com/go/go1.18.3.linux-$(dpkg --print-architecture).tar.gz -Ogo.linux.tar.gz && \ 
+    tar zxf go.linux.tar.gz && \
+    rm go.linux.tar.gz && \
+    ln -s /tmp/golang/go/bin/go /usr/local/bin/ && \
+    ln -s /tmp/golang/go/bin/gofmt /usr/local/bin/
+
+# Install Go-based tooling
+
+# Install Amass
+RUN go install github.com/OWASP/Amass/v3/...@master
+
+# Install FFuF
+RUN go install github.com/ffuf/ffuf@latest 
+
+# Install Gobuster
+RUN go install github.com/OJ/gobuster/v3@latest
+
+# Install Gowitness
+RUN go install github.com/sensepost/gowitness@latest
+
+# Install Hakrawler
+RUN go install github.com/hakluke/hakrawler@latest
+
+# Install subfinder
+RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+
+# Install tko-subs
+RUN go install github.com/anshumanbh/tko-subs@latest
+
+# Clone tooling with git
+WORKDIR /tmp/build
+RUN git clone https://github.com/robertdavidgraham/masscan
+RUN git clone https://github.com/rbsec/sslscan
+
+# Compile masscan
+WORKDIR /tmp/build/masscan
+RUN make -j && make install
+
+# Compile sslscan
+WORKDIR /tmp/build/sslscan
+RUN apt-get build-dep -y openssl && make static
+
+# Exported Image
+FROM debian:testing-slim as final
+LABEL maintainer="dlawson@depthsecurity.com"
+# Install necessary packages
+RUN apt update && \
+    apt install -y --no-install-recommends \
+        chromium \
+        chromium-driver \
+        curl \
+        dnsrecon \
+        fonts-liberation \
+        git \
+        hydra \
+        libimage-exiftool-perl \
+        libnet-ssleay-perl \
+        libpcap-dev \
+        nano \
+        nmap \
+        p7zip-full \
+        python3 \
+        python3-pip \
+        python3-venv \
+        redis-server \
+        sudo \
+        tmux \
+        unzip \
+        whois \
+        wget \
+        vim \
+        xclip
+
+# Upgrade Python pip and symlink Python3 to Python
+RUN python3 -m pip install --upgrade pip && \
+    ln -s /usr/bin/python3 /usr/bin/python
+
+# Install Python 3 virtualenv
+RUN pip install virtualenv
 
 WORKDIR /opt/src
 
+# Install tooling from GitHub
 
-RUN git clone https://github.com/joaomatosf/jexboss.git
-RUN touch /tmp/linkedint2
-RUN git clone https://github.com/fang0654/LinkedInt
-RUN git clone https://github.com/robertdavidgraham/masscan
-RUN git clone https://github.com/sullo/nikto
-RUN git clone https://github.com/m8r0wn/pymeta
-RUN git clone https://github.com/rbsec/sslscan.git
-RUN git clone https://github.com/aboul3la/Sublist3r.git
-RUN git clone https://github.com/anshumanbh/tko-subs.git
-RUN git clone https://github.com/L1NT/xsscrapy.git
-RUN git clone https://github.com/fang0654/Asnlookup.git
-RUN git clone https://github.com/laramies/theHarvester
-RUN git clone https://github.com/projectdiscovery/subfinder.git
-RUN git clone https://github.com/s0md3v/XSStrike.git
-RUN git clone https://github.com/absolomb/adidnsdump.git
+## Install ADIDNSDump 
+RUN git clone --depth 1 https://github.com/absolomb/adidnsdump && \
+    cd adidnsdump && \
+    pip install .
 
-RUN git clone https://github.com/fang0654/DomLink.git
-RUN git clone https://github.com/offensive-security/exploitdb.git
+## Install Asnlookup
+RUN git clone --depth 1 https://github.com/fang0654/Asnlookup && \
+    cd Asnlookup && \
+    ln -s /opt/src/Asnlookup/asnlookup.py /usr/local/bin/asnlookup.py && \
+    chmod +x asnlookup.py
 
-RUN pip3 install virtualenv
-# RUN go get github.com/ffuf/ffuf
+## Install DomLink
+RUN git clone --depth 1 https://github.com/fang0654/DomLink && \
+    cd DomLink && \
+    ln -s /opt/src/DomLink/domLink.py /usr/local/bin/domLink.py && \
+    chmod +x domLink.py
 
-# Next couple of lines are to use custom version of ffuf until it gets updated
-RUN go get github.com/ffuf/ffuf
+## Install ExploitDB
+RUN git clone --depth 1 https://github.com/offensive-security/exploitdb && \
+    cd exploitdb && \
+    ln -s /opt/src/exploitdb/searchsploit /usr/local/bin/searchsploit && \
+    sed -i 's/\/opt\/exploitdb/\/opt\/src\/exploitdb/g' .searchsploit_rc && \
+    cp .searchsploit_rc /root/
 
-RUN ln -s /root/go/bin/ffuf /usr/local/bin/ffuf
-RUN gem install aquatone
-RUN go get github.com/OJ/gobuster/v3
-RUN ln -s /root/go/bin/gobuster /usr/local/bin/gobuster
+## Install Jexboss
+RUN git clone --depth 1 https://github.com/joaomatosf/jexboss && \
+    cd jexboss && \
+    pip install -r requires.txt && \
+    ln -s /opt/src/jexboss/jexboss.py /usr/local/bin/jexboss.py
 
-# Gowitness doesn't seem to be building right now - will just use the latest (at the time) release
+## Install LinkedInt
+RUN git clone --depth 1 https://github.com/fang0654/LinkedInt && \
+    cd LinkedInt && \
+    touch /tmp/linkedint2 && \
+    ln -s /opt/src/LinkedInt/LinkedInt.py /usr/local/bin/LinkedInt.py && \
+    chmod +x LinkedInt.py
 
-RUN go get github.com/sensepost/gowitness
-RUN ln -s /root/go/bin/gowitness /usr/local/bin/gowitness
+## Install nikto
+RUN git clone --depth 1 https://github.com/sullo/nikto && \
+    ln -s /opt/src/nikto/program /opt/nikto && \
+    ln -s /opt/nikto/nikto.pl /usr/local/bin/nikto
 
-#RUN wget https://github.com/sensepost/gowitness/releases/download/2.1.1/gowitness-2.1.1-linux-amd64 -O /usr/local/bin/gowitness
-#RUN chmod +x /usr/local/bin/gowitness
+## Install pymeta
+RUN git clone --depth 1 https://github.com/m8r0wn/pymeta && \
+    cd pymeta && \
+    python3 setup.py install && \
+    chmod +x pymeta.py
 
-#RUN go get github.com/projectdiscovery/subfinder/cmd/subfinder
+## Install Sublist3r
+RUN git clone --depth 1 https://github.com/aboul3la/Sublist3r && \
+    cd Sublist3r && \
+    pip install -r requirements.txt && \
+    ln -s /opt/src/Sublist3r/sublist3r.py /usr/local/bin/sublist3r
 
-#RUN GO111MODULE=on go get -u -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder
-RUN go get -u -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder
+## Install theHarvester
+RUN git clone --depth 1 https://github.com/laramies/theHarvester && \
+    cd theHarvester && \
+    pip install -r requirements.txt && \
+    python3 setup.py install
 
-#WORKDIR /opt/src/subfinder/v2/cmd/subfinder
-#RUN go build .
-#RUN ln -s /opt/src/subfinder/v2/cmd/subfinder/subfinder /usr/local/bin/subfinder
-RUN ln -s /root/go/bin/subfinder /usr/local/bin/subfinder
-# Run this to create the subfinder config, so it doesn't create a race condition causing others to error out as multiple threads try to create it at once
-RUN /usr/local/bin/subfinder -d domainthatdoesnotexits.biz -sources shodan
+## Install xsscrapy
+RUN git clone --depth 1 https://github.com/L1NT/xsscrapy && \
+    cd xsscrapy && \
+    pip install -r requirements.txt && \
+    chmod +x xsscrapy.py
 
-RUN go get github.com/hakluke/hakrawler
-RUN ln -s /root/go/bin/hakrawler /usr/local/bin/hakrawler
-WORKDIR /opt/src/jexboss
-RUN pip install -r requires.txt
-RUN ln -s /opt/src/jexboss/jexboss.py /usr/local/bin/jexboss.py
-WORKDIR /opt/src/LinkedInt
-RUN chmod +x /opt/src/LinkedInt/LinkedInt.py
-RUN ln -s /opt/src/LinkedInt/LinkedInt.py /usr/local/bin/LinkedInt.py
-WORKDIR /opt/src/masscan
-RUN make -j
-RUN make install
-RUN ln -s /opt/src/nikto/program /opt/nikto
-RUN ln -s /opt/nikto/nikto.pl /usr/local/bin/nikto
-WORKDIR /opt/src/pymeta
-RUN python3 setup.py install
-RUN chmod +x pymeta.py
+## Install XSStrike
+RUN git clone --depth 1 https://github.com/s0md3v/XSStrike && \
+    cd XSStrike && \
+    pip install -r requirements.txt  && \
+    chmod +x xsstrike.py && \
+    ln -s /opt/src/XSStrike/xsstrike.py /usr/local/bin/xsstrike.py
 
-WORKDIR /opt/src/XSStrike
-RUN pip3 install -r requirements.txt
-RUN chmod +x /opt/src/XSStrike/xsstrike.py
-RUN ln -s /opt/src/XSStrike/xsstrike.py /usr/local/bin/xsstrike.py
+# Cleanup unnecessary files
+RUN apt clean -y && \
+    apt autoremove -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip cache purge && \
+    rm -rf /root/.cache
 
-WORKDIR /opt/src/sslscan
-RUN apt-get build-dep openssl -y
-# RUN sed -i 's/fPIE/fPIC/g' Makefile
-RUN make static
+# Include Golang tooling from previous stage
+COPY --from=build /root/go/bin/amass /usr/local/bin/amass
+COPY --from=build /root/go/bin/ffuf /usr/local/bin/ffuf
+COPY --from=build /root/go/bin/gobuster /usr/local/bin/gobuster
+COPY --from=build /root/go/bin/gowitness /usr/local/bin/gowitness
+COPY --from=build /root/go/bin/hakrawler /usr/local/bin/hakrawler
+COPY --from=build /root/go/bin/subfinder /usr/local/bin/subfinder
+COPY --from=build /root/go/bin/tko-subs /usr/local/bin/tko-subs
+COPY --from=build /root/go/pkg/mod/github.com/anshumanbh/tko-subs*/providers-data.csv /usr/local/bin/providers-data.csv
 
-RUN ln -s /opt/src/sslscan/sslscan /usr/local/bin/sslscan
-WORKDIR /opt/src/Sublist3r
-RUN pip3 install -r requirements.txt
-RUN ln -s /opt/src/Sublist3r/sublist3r.py /usr/local/bin/sublist3r
-RUN go get github.com/anshumanbh/tko-subs
-RUN ln -s /root/go/bin/tko-subs /usr/local/bin/tko-subs
-RUN ln -s /root/go/src/github.com/anshumanbh/tko-subs/providers-data.csv /usr/local/bin/providers-data.csv
+# Include compiled tooling from previous stage
+COPY --from=build /tmp/build/masscan/bin/masscan /usr/local/bin/masscan
+COPY --from=build /tmp/build/sslscan/sslscan /usr/local/bin/sslscan
 
-
-# Install amass - for whatever reason, I haven't been able to get the go get to work
-#ENV GO111MODULE on
-#RUN go get -v github.com/OWASP/Amass/v3
-#RUN ln -s /root/go/bin/amass /usr/local/bin/amass
-
-WORKDIR /opt/src/amass
-RUN wget https://github.com/OWASP/Amass/releases/download/v3.10.2/amass_linux_amd64.zip
-RUN unzip amass_linux_amd64.zip
-RUN ln -s /opt/src/amass/amass_linux_amd64/amass /usr/local/bin/
-
-WORKDIR /opt/src/xsscrapy
-RUN pip3 install -r requirements.txt
-ENV PATH="${PATH}:/opt/src/xsscrapy"
-RUN chmod +x /opt/src/xsscrapy/xsscrapy.py
-RUN export PATH=$PATH:/opt/src/xsscrapy
-RUN ln -s /opt/src/Asnlookup/asnlookup.py /usr/local/bin/asnlookup.py
-RUN chmod +x /usr/local/bin/asnlookup.py
-RUN ln -s /opt/src/DomLink/domLink.py /usr/local/bin/domLink.py
-RUN chmod +x /usr/local/bin/domLink.py
-
-WORKDIR /opt/src/theHarvester
-# RUN python3 -m venv /opt/src/theHarvestor/myenv
-RUN pip3 install -r requirements.txt
-RUN python3 setup.py install
-# RUN deactivate
-# RUN echo '/opt/src/theHarvestor/myenv/bin/python3 theHarvestor' >> /usr/local/theHarvestor
-# RUN ln -s /opt/src/theHarvestor/theHarvestor.py /usr/local/bin/theHarvestor.py
-# RUN chmod +x /usr/local/bin/theHarvestor
-WORKDIR /opt/src/adidnsdump
-
-RUN pip3 install .
-
-RUN sed -i 's/\/opt\/exploitdb/\/opt\/src\/exploitdb/g' /opt/src/exploitdb/.searchsploit_rc
-RUN cp /opt/src/exploitdb/.searchsploit_rc /root/
-RUN ln -s /opt/src/exploitdb/searchsploit /usr/local/bin/searchsploit
+WORKDIR /
