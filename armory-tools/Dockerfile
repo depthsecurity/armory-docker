@@ -87,7 +87,8 @@ RUN apt update && \
         whois \
         wget \
         vim \
-        xclip
+        xclip \
+        default-libmysqlclient-dev
 
 # Upgrade Python pip and symlink Python3 to Python
 RUN python3 -m pip install --upgrade pip && \
