@@ -16,7 +16,7 @@ RUN apt update && \
 ENV GOROOT "/tmp/golang/go"
 
 WORKDIR /tmp/golang
-RUN wget https://dl.google.com/go/go1.18.3.linux-$(dpkg --print-architecture).tar.gz -Ogo.linux.tar.gz && \ 
+RUN wget https://dl.google.com/go/go1.20.2.linux-$(dpkg --print-architecture).tar.gz -Ogo.linux.tar.gz && \ 
     tar zxf go.linux.tar.gz && \
     rm go.linux.tar.gz && \
     ln -s /tmp/golang/go/bin/go /usr/local/bin/ && \
@@ -64,37 +64,38 @@ LABEL maintainer="dlawson@depthsecurity.com"
 # Install necessary packages
 RUN apt update && \
     apt install -y --no-install-recommends \
-        chromium \
-        chromium-driver \
-        curl \
-        dnsrecon \
-        fonts-liberation \
-        git \
-        hydra \
-        libimage-exiftool-perl \
-        libnet-ssleay-perl \
-        libpcap-dev \
-        nano \
-        nmap \
-        p7zip-full \
-        python3 \
-        python3-pip \
-        python3-venv \
-        redis-server \
-        sudo \
-        tmux \
-        unzip \
-        whois \
-        wget \
-        vim \
-        xclip
+    chromium \
+    chromium-driver \
+    curl \
+    dnsrecon \
+    fonts-liberation \
+    git \
+    hydra \
+    libimage-exiftool-perl \
+    libnet-ssleay-perl \
+    libpcap-dev \
+    nano \
+    nmap \
+    p7zip-full \
+    python3 \
+    python3-pip \
+    python3-venv \
+    python3-bs4 \
+    redis-server \
+    sudo \
+    tmux \
+    unzip \
+    whois \
+    wget \
+    vim \
+    xclip 
 
 # Upgrade Python pip and symlink Python3 to Python
-RUN python3 -m pip install --upgrade pip && \
+RUN python3 -m pip install --upgrade pip --break-system-packages && \
     ln -s /usr/bin/python3 /usr/bin/python
 
 # Install Python 3 virtualenv
-RUN pip install virtualenv
+RUN pip install virtualenv --break-system-packages
 
 WORKDIR /opt/src
 
@@ -103,7 +104,7 @@ WORKDIR /opt/src
 ## Install ADIDNSDump 
 RUN git clone --depth 1 https://github.com/absolomb/adidnsdump && \
     cd adidnsdump && \
-    pip install .
+    pip install . --break-system-packages
 
 ## Install Asnlookup
 RUN git clone --depth 1 https://github.com/fang0654/Asnlookup && \
@@ -118,7 +119,7 @@ RUN git clone --depth 1 https://github.com/fang0654/DomLink && \
     chmod +x domLink.py
 
 ## Install ExploitDB
-RUN git clone --depth 1 https://github.com/offensive-security/exploitdb && \
+RUN git clone --depth 1 https://gitlab.com/exploit-database/exploitdb && \
     cd exploitdb && \
     ln -s /opt/src/exploitdb/searchsploit /usr/local/bin/searchsploit && \
     sed -i 's/\/opt\/exploitdb/\/opt\/src\/exploitdb/g' .searchsploit_rc && \
@@ -127,7 +128,7 @@ RUN git clone --depth 1 https://github.com/offensive-security/exploitdb && \
 ## Install Jexboss
 RUN git clone --depth 1 https://github.com/joaomatosf/jexboss && \
     cd jexboss && \
-    pip install -r requires.txt && \
+    pip install -r requires.txt --break-system-packages && \
     ln -s /opt/src/jexboss/jexboss.py /usr/local/bin/jexboss.py
 
 ## Install LinkedInt
@@ -143,33 +144,30 @@ RUN git clone --depth 1 https://github.com/sullo/nikto && \
     ln -s /opt/nikto/nikto.pl /usr/local/bin/nikto
 
 ## Install pymeta
-RUN git clone --depth 1 https://github.com/m8r0wn/pymeta && \
-    cd pymeta && \
-    python3 setup.py install && \
-    chmod +x pymeta.py
+RUN pip install git+https://github.com/m8r0wn/pymeta.git --break-system-packages
 
 ## Install Sublist3r
 RUN git clone --depth 1 https://github.com/aboul3la/Sublist3r && \
     cd Sublist3r && \
-    pip install -r requirements.txt && \
+    pip install -r requirements.txt --break-system-packages && \
     ln -s /opt/src/Sublist3r/sublist3r.py /usr/local/bin/sublist3r
 
 ## Install theHarvester
 RUN git clone --depth 1 https://github.com/laramies/theHarvester && \
     cd theHarvester && \
-    pip install -r requirements.txt && \
+    pip install -r requirements.txt --break-system-packages && \
     python3 setup.py install
 
 ## Install xsscrapy
 RUN git clone --depth 1 https://github.com/L1NT/xsscrapy && \
     cd xsscrapy && \
-    pip install -r requirements.txt && \
+    pip install -r requirements.txt --break-system-packages && \
     chmod +x xsscrapy.py
 
 ## Install XSStrike
 RUN git clone --depth 1 https://github.com/s0md3v/XSStrike && \
     cd XSStrike && \
-    pip install -r requirements.txt  && \
+    pip install -r requirements.txt --break-system-packages && \
     chmod +x xsstrike.py && \
     ln -s /opt/src/XSStrike/xsstrike.py /usr/local/bin/xsstrike.py
 
@@ -177,7 +175,7 @@ RUN git clone --depth 1 https://github.com/s0md3v/XSStrike && \
 RUN apt clean -y && \
     apt autoremove -y && \
     rm -rf /var/lib/apt/lists/* && \
-    pip cache purge && \
+    pip cache purge  && \
     rm -rf /root/.cache
 
 # Include Golang tooling from previous stage
