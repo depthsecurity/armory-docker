@@ -25,7 +25,7 @@ RUN wget https://dl.google.com/go/go1.20.2.linux-$(dpkg --print-architecture).ta
 # Install Go-based tooling
 
 # Install Amass
-RUN go install github.com/OWASP/Amass/v3/...@master
+RUN go install -v github.com/owasp-amass/amass/v3/...@master
 
 # Install FFuF
 RUN go install github.com/ffuf/ffuf@latest 
