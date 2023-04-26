@@ -1,7 +1,8 @@
 FROM debian:testing-slim as build
 
 # Install Armory build dependencies
-RUN apt update && \
+RUN  \
+    apt update && \
     apt install -y --no-install-recommends \
     default-libmysqlclient-dev \
     gcc \
@@ -11,12 +12,15 @@ RUN apt update && \
     libxslt-dev \
     python3 \
     python3-dev \
-    python3-pip
+    python3-pip \
+    libjpeg-dev \
+    zlib1g-dev 
 
 # Clone Armory
 WORKDIR /tmp
-RUN git clone --depth 1 https://github.com/depthsecurity/armory
-
+RUN git clone https://github.com/depthsecurity/armory
+WORKDIR /tmp/armory
+RUN git checkout fix-main-image
 # Build Armory wheel
 WORKDIR /tmp/armory-wheel
 RUN pip wheel -r /tmp/armory/requirements.txt -w requirements && \
@@ -32,20 +36,24 @@ COPY --from=build /tmp/armory-wheel /tmp/armory-wheel
 
 # Install Armory
 WORKDIR /tmp/armory-wheel
-RUN /bin/bash -c "virtualenv /opt/armory && \
+RUN /bin/bash -c "virtualenv /opt/armory/local/ && \
     source /opt/armory/local/bin/activate && \
     pip install requirements/* && \
     pip install extras/* && \
     pip install core/* && \
+    pip install pycryptodome && \
     rm -rf /tmp/armory-wheel"
 
 # Install misc pip packages
-RUN pip install pycryptodome
+# RUN pip install pycryptodome
 
 # Prepare launch_api.sh
 COPY launch_api.sh /usr/bin/launch_api.sh
 RUN chmod +x /usr/bin/launch_api.sh
 
+COPY armory_launch.sh /usr/bin/armory
+COPY armory_launch.sh /usr/bin/armory2
+RUN chmod +x /usr/bin/armory /usr/bin/armory2
 # Cleanup
 RUN pip cache purge && \
     rm -rf /root/.cache/* && \
