@@ -53,7 +53,9 @@ RUN chmod +x /usr/bin/launch_api.sh
 
 COPY armory_launch.sh /usr/bin/armory
 COPY armory_launch.sh /usr/bin/armory2
-RUN chmod +x /usr/bin/armory /usr/bin/armory2
+COPY armory-manage.sh /usr/bin/armory2-manage
+COPY armory-manage.sh /usr/bin/armory-manage
+RUN chmod +x /usr/bin/armory /usr/bin/armory2 /usr/bin/armory2-manage /usr/bin/armory-manage
 # Cleanup
 RUN pip cache purge && \
     rm -rf /root/.cache/* && \
