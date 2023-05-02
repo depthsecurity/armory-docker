@@ -14,7 +14,9 @@ RUN  \
     python3-dev \
     python3-pip \
     libjpeg-dev \
-    zlib1g-dev 
+    zlib1g-dev \
+    libjpeg-dev \
+    libfreetype6-dev
 
 # Clone Armory
 WORKDIR /tmp

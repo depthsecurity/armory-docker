@@ -10,9 +10,8 @@ RUN apt update && \
     git \
     make \
     wget \
-    zlib1g-dev \
-    libjpeg-dev \
-    libfreetype6-dev
+    zlib1g-dev 
+
 
 # Install Golang
 ENV GOROOT "/tmp/golang/go"
