@@ -21,8 +21,8 @@ RUN  \
 # Clone Armory
 WORKDIR /tmp
 RUN git clone https://github.com/depthsecurity/armory
-WORKDIR /tmp/armory
-RUN git checkout fix-main-image
+# WORKDIR /tmp/armory
+# RUN git checkout fix-main-image
 # Build Armory wheel
 WORKDIR /tmp/armory-wheel
 RUN pip wheel -r /tmp/armory/requirements.txt -w requirements && \
