@@ -172,6 +172,10 @@ RUN git clone --depth 1 https://github.com/s0md3v/XSStrike && \
     chmod +x xsstrike.py && \
     ln -s /opt/src/XSStrike/xsstrike.py /usr/local/bin/xsstrike.py
 
+# Install Telerik scan script
+RUN curl https://github.com/jk-mayne/telerik-scan/raw/main/telerik_scan.sh -o /usr/local/bin/telerik_scan.sh
+RUN chmod +x /usr/local/bin/telerik_scan.sh
+
 # Cleanup unnecessary files
 RUN apt clean -y && \
     apt autoremove -y && \
