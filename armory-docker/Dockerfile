@@ -19,7 +19,8 @@ RUN  \
     libjpeg-dev \
     libfreetype6-dev \
     ca-certificates \
-    curl
+    curl \
+    python3-setuptools
 
 RUN install -m 0755 -d /etc/apt/keyrings
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
