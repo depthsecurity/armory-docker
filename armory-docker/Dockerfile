@@ -19,7 +19,8 @@ RUN  \
     libjpeg-dev \
     libfreetype6-dev \
     ca-certificates \
-    curl 
+    curl \
+    fonts-liberation
 
 RUN pip install --break-system-packages -U setuptools
 RUN install -m 0755 -d /etc/apt/keyrings
