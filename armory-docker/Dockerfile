@@ -20,7 +20,8 @@ RUN  \
     libfreetype6-dev \
     ca-certificates \
     curl \
-    fonts-liberation
+    fonts-liberation \
+    pkg-config
 
 RUN pip install --break-system-packages -U setuptools
 RUN install -m 0755 -d /etc/apt/keyrings
@@ -34,7 +35,7 @@ RUN echo \
   tee /etc/apt/sources.list.d/docker.list > /dev/null
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends \
-    docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 
 # Clone Armory
 WORKDIR /tmp
 RUN git clone https://github.com/depthsecurity/armory
