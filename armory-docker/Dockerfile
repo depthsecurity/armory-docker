@@ -43,11 +43,11 @@ RUN git checkout docker
 # WORKDIR /tmp/armory
 # RUN git checkout fix-main-image
 # Build Armory wheel
-WORKDIR /tmp/armory-wheel
-RUN pip wheel -r /tmp/armory/requirements.txt -w requirements && \
-    pip wheel jinja2 xlsxwriter -w extras && \ 
-    pip wheel django-q2 -w extras --no-deps && \
-    pip wheel /tmp/armory/. -w core --no-deps
+# WORKDIR /tmp/armory-wheel
+# RUN pip wheel -r /tmp/armory/requirements.txt -w requirements && \
+#     pip wheel jinja2 xlsxwriter -w extras && \ 
+#     pip wheel django-q2 -w extras --no-deps && \
+#     pip wheel /tmp/armory/. -w core --no-deps
 
 # # Exported Image
 # FROM debian:testing-slim
@@ -56,16 +56,19 @@ RUN pip wheel -r /tmp/armory/requirements.txt -w requirements && \
 # COPY --from=build /tmp/armory-wheel /tmp/armory-wheel
 
 # Install Armory
-WORKDIR /tmp/armory-wheel
-RUN /bin/bash -c "virtualenv /opt/armory/local/ && \
-    source /opt/armory/local/bin/activate && \
-    pip install requirements/* && \
-    pip install extras/* && \
-    pip install core/* && \
-    pip install pycryptodome && \
-    pip uninstall django-q -y && \
-    rm -rf /tmp/armory-wheel"
+# WORKDIR /tmp/armory-wheel
 
+
+# RUN /bin/bash -c "virtualenv /opt/armory/local/ && \
+#     source /opt/armory/local/bin/activate && \
+#     pip install requirements/* && \
+#     pip install extras/* && \
+#     pip install core/* && \
+#     pip install pycryptodome && \
+#     rm -rf /tmp/armory-wheel"
+
+RUN pip install -r requirements.txt --break-system-packages
+RUN python3 setup.py install 
 # Install misc pip packages
 # RUN pip install pycryptodome
 
