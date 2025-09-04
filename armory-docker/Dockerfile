@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM python:3.11
 
 # Install Armory build dependencies
 RUN  \
@@ -46,7 +46,7 @@ RUN git checkout docker
 WORKDIR /tmp/armory-wheel
 RUN pip wheel -r /tmp/armory/requirements.txt -w requirements && \
     pip wheel jinja2 xlsxwriter -w extras && \ 
-    pip wheel django_q -w extras --no-deps && \
+    pip wheel django-q2 -w extras --no-deps && \
     pip wheel /tmp/armory/. -w core --no-deps
 
 # # Exported Image
@@ -63,6 +63,7 @@ RUN /bin/bash -c "virtualenv /opt/armory/local/ && \
     pip install extras/* && \
     pip install core/* && \
     pip install pycryptodome && \
+    pip uninstall django-q -y && \
     rm -rf /tmp/armory-wheel"
 
 # Install misc pip packages
